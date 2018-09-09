@@ -26,7 +26,7 @@ namespace guac_storage.Controllers
 
         // GET api/file/downlaod
         [HttpGet("download")]
-        public HttpResponseMessage Download()
+        public IActionResult Download()
         {
             string path = @"C:\guac\";
             string[] files;
@@ -35,22 +35,14 @@ namespace guac_storage.Controllers
             if (System.IO.File.Exists(files[0]))
             {
 
-                HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
-                var fileStream = new FileStream(files[0], FileMode.Open);
-                response.Content = new StreamContent(fileStream);
-                //response.Content = new StreamContent(fileStream);
-                response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
-                //response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                //response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
-                //response.Content.Headers.ContentDisposition.FileName = "yeet";
-
-                fileStream.Close();
-                return response;
+                byte[] b = System.IO.File.ReadAllBytes(files[0]);   // You can use your own method over here.         
+                return File(b, "application/octet-stream");
             }
 
             else
             {
-                return new HttpResponseMessage(System.Net.HttpStatusCode.NotFound);
+                //return new HttpResponseMessage(System.Net.HttpStatusCode.NotFound);
+                return Ok();
             }
 
            
