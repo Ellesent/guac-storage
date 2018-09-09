@@ -1,3 +1,6 @@
 obj/
 .vscode/
 bin/
+.vs/
+Properties/
+guac-storage.csproj.user
