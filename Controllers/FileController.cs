@@ -25,17 +25,18 @@ namespace guac_storage.Controllers
         }
 
         // GET api/file/downlaod
-        [HttpGet("download")]
-        public IActionResult Download()
+        [HttpGet("download/{id}")]
+        public IActionResult Download(string id)
         {
-            string path = @"C:\guac\";
+            string path = @"C:\guac\" + id;
             string[] files;
 
-            files = Directory.GetFiles(path);
-            if (System.IO.File.Exists(files[0]))
+            //files = Directory.GetFiles(path);
+            if (System.IO.File.Exists(path))
             {
 
-                byte[] b = System.IO.File.ReadAllBytes(files[0]);   // You can use your own method over here.         
+                // Get all bytes of file and return file 
+                byte[] b = System.IO.File.ReadAllBytes(path);         
                 return File(b, "application/octet-stream");
             }
 
