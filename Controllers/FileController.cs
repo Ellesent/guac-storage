@@ -39,16 +39,14 @@ namespace guac_storage.Controllers
             var filePath = Path.Combine(guacHomePath, newFileName);
 
             System.IO.Directory.CreateDirectory(guacHomePath);
+
             // Create new File
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 //copy the contents of the specified file to the newly created file 
                 await file.CopyToAsync(stream);
             }
-
-            //DEBUG: Write file path to console
-            Console.WriteLine("filepath:" + filePath);
-
+            // return the file name for the newly locally stored file
             return Ok(newFileName);
         }
 
