@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Cors;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -18,10 +20,27 @@ namespace guac_storage.Controllers
     {
     
         // GET api/file/upload
-        [HttpGet("upload")]
-        public ActionResult<string> Upload()
+        [HttpPost("upload")]
+        [EnableCors("MyPolicy")]
+        public async Task<IActionResult> Upload(IFormFile file)
         {
-            return "value";
+            // get size 
+            long size = file.Length;
+        
+            // Get user's temp folder, and use a random file name
+            var filePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
+            // Create new File
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                //copy the contents of the specified file to the newly created file 
+                await file.CopyToAsync(stream);
+            }
+
+            //DEBUG: Write file path to console
+            Console.WriteLine("filepath:" + filePath);
+
+            return Ok(new { size, filePath });
         }
 
         // GET api/file/downlaod
@@ -29,7 +48,6 @@ namespace guac_storage.Controllers
         public IActionResult Download(string id)
         {
             string path = @"C:\guac\" + id;
-            string[] files;
 
             //files = Directory.GetFiles(path);
             if (System.IO.File.Exists(path))
