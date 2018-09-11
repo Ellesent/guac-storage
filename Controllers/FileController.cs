@@ -18,7 +18,12 @@ namespace guac_storage.Controllers
     [ApiController]
     public class FileController : Controller
     {
-    
+        // Get home directory based on if os is Windows or Unix
+        readonly string guacHomePath = (Environment.OSVersion.Platform == PlatformID.Unix ||
+                   Environment.OSVersion.Platform == PlatformID.MacOSX)
+    ? Path.Combine(Environment.GetEnvironmentVariable("HOME"), "guac")
+    : Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), "guac");
+
         // GET api/file/upload
         [HttpPost("upload")]
         [EnableCors("MyPolicy")]
@@ -26,10 +31,14 @@ namespace guac_storage.Controllers
         {
             // get size 
             long size = file.Length;
-        
-            // Get user's temp folder, and use a random file name
-            var filePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
+            // create the new file name consisting of the current time plus a GUID
+            string newFileName = DateTime.Now.Ticks + "_" + Guid.NewGuid().ToString();
+
+            // Get full file path with new file name
+            var filePath = Path.Combine(guacHomePath, newFileName);
+
+            System.IO.Directory.CreateDirectory(guacHomePath);
             // Create new File
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
@@ -40,21 +49,21 @@ namespace guac_storage.Controllers
             //DEBUG: Write file path to console
             Console.WriteLine("filepath:" + filePath);
 
-            return Ok(new { size, filePath });
+            return Ok(newFileName);
         }
 
         // GET api/file/downlaod
         [HttpGet("download/{id}")]
         public IActionResult Download(string id)
         {
-            string path = @"C:\guac\" + id;
+            string path = Path.Combine(guacHomePath, id);
 
             //files = Directory.GetFiles(path);
             if (System.IO.File.Exists(path))
             {
 
                 // Get all bytes of file and return file 
-                byte[] b = System.IO.File.ReadAllBytes(path);         
+                byte[] b = System.IO.File.ReadAllBytes(path);
                 return File(b, "application/octet-stream");
             }
 
@@ -64,7 +73,7 @@ namespace guac_storage.Controllers
                 return Ok();
             }
 
-           
+
         }
 
     }
